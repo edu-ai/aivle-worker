@@ -8,5 +8,5 @@ import client
 # print(env_name)
 # sandbox.run_with_venv(env_name, ["bash", "./bootstrap.sh"], "/tmp/aivle-worker/grading/test")
 
-submission = client.get_submission()
+submission = client.get_submission("../examples/aivle-single/submission.json")
 client.run_submission(submission)

@@ -13,6 +13,6 @@ def run_with_venv(env_name: str, command: List[str], home: str = ""):
     else:
         full_cmd.append("--private")
     full_cmd.extend(command)
-    # print(" ".join(full_cmd))
+    print(" ".join(full_cmd))
     result = subprocess.run(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     print(result.returncode, result.stderr, result.stdout)

@@ -16,8 +16,8 @@ class Submission:
         self.bootstrap = bootstrap
 
 
-def get_submission():
-    with open("/home/leo/aivle-runner-v2/submission.json", "r") as f:
+def get_submission(path: str):
+    with open(path, "r") as f:
         obj = json.loads(f.read())
         return Submission(**obj)
 
