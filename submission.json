@@ -2,7 +2,7 @@
   "id": "some-random-id",
   "env": {
     "type": "virtualenv",
-    "requirements": "/home/leo/aivle-runner-v2/venv-req.txt"
+    "requirements": "/home/leo/aivle-runner-v2/aivle-worker/requirements/base.txt"
   },
   "grader": "/home/leo/Documents/fyp/aivle-grader/examples/worker/grader.py",
   "agent": "/home/leo/Documents/fyp/aivle-grader/examples/worker/agent.py",
