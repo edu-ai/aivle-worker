@@ -1,7 +1,11 @@
+import logging
+
 import settings
 import aivle_venv
 import sandbox
 import client
+
+logging.basicConfig(level=logging.DEBUG)
 
 # print(settings.TEMP_VENV_FOLDER)
 # env_name = aivle_venv.create_venv("/home/leo/aivle-runner-v2/aivle-worker/requirements/base.txt")
@@ -9,4 +13,5 @@ import client
 # sandbox.run_with_venv(env_name, ["bash", "./bootstrap.sh"], "/tmp/aivle-worker/grading/test")
 
 submission = client.get_submission("../examples/aivle-single/submission.json")
-client.run_submission(submission)
+stdout = client.run_submission(submission)
+logging.info(stdout)

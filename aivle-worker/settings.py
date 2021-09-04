@@ -12,3 +12,4 @@ if not os.path.isdir(TEMP_VENV_FOLDER):
 TEMP_GRADING_FOLDER = os.path.join(TEMP_FOLDER_ROOT, "grading")
 if not os.path.isdir(TEMP_GRADING_FOLDER):
     os.mkdir(TEMP_GRADING_FOLDER)
+LOCAL_FILE = True
