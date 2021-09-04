@@ -1,0 +1,10 @@
+{
+  "id": "some-random-id",
+  "env": {
+    "type": "virtualenv",
+    "requirements": "/home/leo/aivle-runner-v2/venv-req.txt"
+  },
+  "grader": "/home/leo/Documents/fyp/aivle-grader/examples/worker/grader.py",
+  "agent": "/home/leo/Documents/fyp/aivle-grader/examples/worker/agent.py",
+  "bootstrap": "/home/leo/Documents/fyp/aivle-grader/examples/worker/bootstrap.sh"
+}
