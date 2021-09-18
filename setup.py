@@ -8,7 +8,7 @@ setup(
     author="Yuanhong Tan",
     author_email="tan.yuanhong@u.nus.edu",
     packages=["aivle-worker"],
-    install_requires=["requests"],
+    install_requires=["requests", "websockets", "celery"],
     # setup_requires=['wheel'],
     zip_safe=False,
 )

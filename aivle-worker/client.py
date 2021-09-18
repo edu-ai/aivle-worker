@@ -1,54 +1,43 @@
-import json
 import os
 import shutil
+import zipfile
 
 import requests
 
-import aivle_venv
-import sandbox
 import settings
 import util
+from sandbox import create_venv, run_with_venv
 
 
 class Submission:
-    def __init__(self, id: str, env: dict, grader: str, agent: str, bootstrap: str):
-        self.id = id
-        self.env = env
-        self.grader = grader
-        self.agent = agent
-        self.bootstrap = bootstrap
+    def __init__(self, sid: int, task_url: str, agent_url: str):
+        self.sid = sid
+        self.task_url = task_url
+        self.agent_url = agent_url
+
+    def __str__(self):
+        return f"Submission-{self.sid}-<{self.task_url}>-<{self.agent_url}>"
 
 
-def get_submission(path: str):
-    with open(path, "r") as f:
-        obj = json.loads(f.read())
-        s = Submission(**obj)
-        if settings.LOCAL_FILE:
-            s.env["requirements"] = "file://" + os.path.abspath(s.env["requirements"])
-            s.grader = "file://" + os.path.abspath(s.grader)
-            s.agent = "file://" + os.path.abspath(s.agent)
-            s.bootstrap = "file://" + os.path.abspath(s.bootstrap)
-        return s
-
-
-def download_submission(s: Submission) -> str:
-    temp_grading_folder = os.path.join(settings.TEMP_GRADING_FOLDER, s.id)
+def _download_submission(s: Submission) -> str:
+    temp_grading_folder = os.path.join(settings.TEMP_GRADING_FOLDER, str(s.sid))
     if not os.path.exists(temp_grading_folder):
         os.mkdir(temp_grading_folder)
     session = requests.Session()
     if settings.LOCAL_FILE:
         session.mount("file://", util.LocalFileAdapter())
-    util.download_and_save(session, s.env["requirements"], os.path.join(temp_grading_folder, "requirements.txt"))
-    util.download_and_save(session, s.grader, os.path.join(temp_grading_folder, "grader.py"))
-    util.download_and_save(session, s.agent, os.path.join(temp_grading_folder, "agent.py"))
-    util.download_and_save(session, s.bootstrap, os.path.join(temp_grading_folder, "bootstrap.sh"))
+    task_zip_path = os.path.join(temp_grading_folder, "task.zip")
+    util.download_and_save(session, s.task_url, task_zip_path)
+    with zipfile.ZipFile(task_zip_path, "r") as zip_ref:
+        zip_ref.extractall(temp_grading_folder)
+    util.download_and_save(session, s.agent_url, os.path.join(temp_grading_folder, "agent.py"))
     return temp_grading_folder
 
 
 def run_submission(s: Submission) -> str:
-    temp_grading_folder = download_submission(s)
-    env_name = aivle_venv.create_venv(os.path.join(temp_grading_folder, "requirements.txt"))
-    sandbox.run_with_venv(env_name, ["bash", "./bootstrap.sh"], temp_grading_folder)
+    temp_grading_folder = _download_submission(s)
+    env_name = create_venv(os.path.join(temp_grading_folder, "requirements.txt"))
+    run_with_venv(env_name, ["bash", "./bootstrap.sh"], temp_grading_folder)
     with open(os.path.join(temp_grading_folder, "stdout.log"), "r") as f:
         stdout_log = f.read().split("\x07")[1]
         f.close()

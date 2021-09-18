@@ -1,9 +1,6 @@
 import logging
 
-import settings
-import aivle_venv
-import sandbox
-import client
+from tasks import app
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -12,6 +9,8 @@ logging.basicConfig(level=logging.DEBUG)
 # print(env_name)
 # sandbox.run_with_venv(env_name, ["bash", "./bootstrap.sh"], "/tmp/aivle-worker/grading/test")
 
-submission = client.get_submission("../examples/aivle-single/submission.json")
-stdout = client.run_submission(submission)
-logging.info(stdout)
+argv = [
+    'worker',
+    '--loglevel=INFO',
+]
+app.worker_main(argv)

@@ -4,6 +4,8 @@ import sys
 import requests
 from requests import Session
 
+from settings import ACCESS_TOKEN
+
 if sys.version_info.major < 3:
     from urllib import url2pathname
 else:
@@ -64,7 +66,9 @@ class LocalFileAdapter(requests.adapters.BaseAdapter):
 
 
 def download_and_save(session: Session, url: str, path: str):
-    r = session.get(url)
+    r = session.get(url, headers={"Authorization": f"Token {ACCESS_TOKEN}"}, allow_redirects=False)
+    if r.status_code != 200:
+        raise Exception(r.status_code)  # TODO
     with open(path, "wb") as f:
         f.write(r.content)
         f.close()
