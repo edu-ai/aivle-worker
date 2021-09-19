@@ -4,9 +4,10 @@ from celery import Celery
 
 from apis import start_job, submit_job
 from client import run_submission
+from settings import CELERY_BROKER_URI, CELERY_RESULT_BACKEND
 
 # set the default Django settings module for the 'celery' program.
-app = Celery("worker", backend="rpc", broker="amqp://localhost")
+app = Celery("worker", backend=CELERY_RESULT_BACKEND, broker=CELERY_BROKER_URI)
 
 
 @app.task(bind=True, name="aiVLE.submit_eval_task")

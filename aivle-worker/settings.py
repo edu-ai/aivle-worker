@@ -1,6 +1,10 @@
 import os
 import tempfile
 
+from dotenv import load_dotenv
+
+load_dotenv(verbose=True)
+
 PROFILE_PATH = "./profiles/aivle-base.profile"
 CREATE_VENV_PATH = "./scripts/create-venv.sh"
 TEMP_FOLDER_ROOT = os.path.join(tempfile.gettempdir(), "aivle-worker")
@@ -15,5 +19,8 @@ if not os.path.isdir(TEMP_GRADING_FOLDER):
 LOCAL_FILE = True
 
 # API config
-API_BASE_URL = "http://localhost:8000/api/v1"
-ACCESS_TOKEN = "758616eea36a8290cf62baf219616869f0a54981"
+# API_BASE_URL = "http://localhost:8000/api/v1"
+API_BASE_URL = "https://aivle-api.leotan.cn/api/v1"
+ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
+CELERY_BROKER_URI = os.getenv("BROKER_URI")
+CELERY_RESULT_BACKEND = "rpc"
