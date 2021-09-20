@@ -39,7 +39,7 @@ def run_submission(s: Submission) -> str:
     env_name = create_venv(os.path.join(temp_grading_folder, "requirements.txt"))
     run_with_venv(env_name, ["bash", "./bootstrap.sh"], temp_grading_folder)
     with open(os.path.join(temp_grading_folder, "stdout.log"), "r") as f:
-        stdout_log = f.read().split("\x07")[1]
+        stdout_log = f.read().split("\x07")[1].splitlines()[0]
         f.close()
     shutil.rmtree(temp_grading_folder)
     return stdout_log
