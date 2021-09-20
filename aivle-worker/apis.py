@@ -1,4 +1,5 @@
 import json
+import os
 
 import requests
 
@@ -15,10 +16,13 @@ def get_agent_url(submission_id: int):
 
 
 def start_job(job_id, task_id) -> Submission:
+    worker_name = "unknown_worker"
+    if os.getenv("WORKER_NAME") is not None:
+        worker_name = os.getenv("WORKER_NAME")
     resp = requests.get(API_BASE_URL + f"/jobs/{job_id}/start_job/",
                         headers={"Authorization": f"Token {ACCESS_TOKEN}"},
                         data={
-                            "worker_name": "test_worker_1",
+                            "worker_name": worker_name,
                             "task_id": task_id
                         })
     if resp.status_code != 200:

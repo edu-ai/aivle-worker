@@ -1,6 +1,9 @@
 from __future__ import absolute_import
 
+import os
+
 from celery import Celery
+from celery.signals import celeryd_after_setup
 
 from apis import start_job, submit_job
 from client import run_submission
@@ -17,3 +20,8 @@ def evaluate(self, job_id):
     result = run_submission(submission)
     submit_job(job_id, task_id, result)
     return result
+
+
+@celeryd_after_setup.connect
+def capture_worker_name(sender, instance, **kwargs):
+    os.environ["WORKER_NAME"] = '{0}'.format(sender)
