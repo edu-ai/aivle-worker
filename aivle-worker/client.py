@@ -30,7 +30,10 @@ def _download_submission(s: Submission) -> str:
     util.download_and_save(session, s.task_url, task_zip_path)
     with zipfile.ZipFile(task_zip_path, "r") as zip_ref:
         zip_ref.extractall(temp_grading_folder)
-    util.download_and_save(session, s.agent_url, os.path.join(temp_grading_folder, "agent.py"))
+    agent_zip_path = os.path.join(temp_grading_folder, "agent.zip")
+    util.download_and_save(session, s.agent_url, agent_zip_path)
+    with zipfile.ZipFile(agent_zip_path, "r") as zip_ref:
+        zip_ref.extractall(temp_grading_folder)
     return temp_grading_folder
 
 
@@ -38,6 +41,7 @@ def run_submission(s: Submission) -> str:
     temp_grading_folder = _download_submission(s)
     env_name = create_venv(os.path.join(temp_grading_folder, "requirements.txt"))
     run_with_venv(env_name, ["bash", "./bootstrap.sh"], temp_grading_folder)
+    # TODO: output stderr
     with open(os.path.join(temp_grading_folder, "stdout.log"), "r") as f:
         stdout_log = f.read().split("\x07")[1].splitlines()[0]
         f.close()
