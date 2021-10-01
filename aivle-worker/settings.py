@@ -24,3 +24,4 @@ API_BASE_URL = "https://aivle-api.leotan.cn/api/v1"
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 CELERY_BROKER_URI = os.getenv("BROKER_URI")
 CELERY_RESULT_BACKEND = "rpc"
+CELERY_QUEUE = os.getenv("TASK_QUEUE") if os.getenv("TASK_QUEUE") is not None else "default"

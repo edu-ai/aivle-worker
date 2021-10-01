@@ -1,5 +1,6 @@
 import logging
 
+from settings import CELERY_QUEUE
 from tasks import app
 
 logging.basicConfig(level=logging.DEBUG)
@@ -12,5 +13,7 @@ logging.basicConfig(level=logging.DEBUG)
 argv = [
     'worker',
     '--loglevel=INFO',
+    '-Q',
+    CELERY_QUEUE,
 ]
 app.worker_main(argv)
