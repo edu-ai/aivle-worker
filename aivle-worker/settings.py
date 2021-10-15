@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv(verbose=True)
 
+# Sandbox config
 PROFILE_PATH = "./profiles/aivle-base.profile"
 CREATE_VENV_PATH = "./scripts/create-venv.sh"
 TEMP_FOLDER_ROOT = os.path.join(tempfile.gettempdir(), "aivle-worker")

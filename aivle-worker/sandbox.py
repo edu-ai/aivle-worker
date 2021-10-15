@@ -7,6 +7,13 @@ import settings
 
 
 def create_venv(req_path: str, force: bool = False) -> str:
+    """
+    Create virtual environment (NOTE: this step happens outside of any security sandbox)
+
+    :param req_path: path to the requirements.txt file
+    :param force: if True, the cached environment will be overwritten
+    :return: venv name
+    """
     with open(req_path, "r") as f:
         req_str = f.read()
         f.close()
@@ -28,6 +35,13 @@ def create_venv(req_path: str, force: bool = False) -> str:
 
 
 def run_with_venv(env_name: str, command: List[str], home: str = ""):
+    """
+    Run `command` within venv named `env_name`
+
+    :param env_name: venv name
+    :param command:
+    :param home: path to the home directory (check --private={HOME} in Firejail doc)
+    """
     full_cmd = ["firejail",
                 f"--profile={settings.PROFILE_PATH}",
                 "--read-only=/tmp",

@@ -37,13 +37,13 @@ def _download_submission(s: Submission) -> str:
     return temp_grading_folder
 
 
-def run_submission(s: Submission) -> str:
+def run_submission(s: Submission, force: bool = False) -> str:
     temp_grading_folder = _download_submission(s)
-    env_name = create_venv(os.path.join(temp_grading_folder, "requirements.txt"))
+    env_name = create_venv(os.path.join(temp_grading_folder, "requirements.txt"), force=force)
     run_with_venv(env_name, ["bash", "./bootstrap.sh"], temp_grading_folder)
     # TODO: output stderr
     with open(os.path.join(temp_grading_folder, "stdout.log"), "r") as f:
-        stdout_log = f.read().split("\x07")[1].splitlines()[0]
+        stdout_log = f.read().split("\x07")[1].splitlines()[0]  # hack
         f.close()
     shutil.rmtree(temp_grading_folder)
     return stdout_log

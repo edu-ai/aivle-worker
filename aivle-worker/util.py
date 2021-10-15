@@ -1,5 +1,6 @@
 import os
 import sys
+from urllib.parse import urlparse
 
 import requests
 from requests import Session
@@ -66,9 +67,12 @@ class LocalFileAdapter(requests.adapters.BaseAdapter):
 
 
 def download_and_save(session: Session, url: str, path: str):
-    r = session.get(url, headers={"Authorization": f"Token {ACCESS_TOKEN}"}, allow_redirects=False)
-    if r.status_code != 200:
-        raise Exception(r.status_code)  # TODO
+    if urlparse(url).scheme == "file":
+        r = session.get(url)
+    else:
+        r = session.get(url, headers={"Authorization": f"Token {ACCESS_TOKEN}"}, allow_redirects=False)
+        if r.status_code != 200:
+            raise Exception(r.status_code)  # TODO
     with open(path, "wb") as f:
         f.write(r.content)
         f.close()

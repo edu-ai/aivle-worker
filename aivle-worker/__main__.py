@@ -1,19 +1,28 @@
 import logging
 
+from client import Submission, run_submission
 from settings import CELERY_QUEUE
 from tasks import app
 
 logging.basicConfig(level=logging.DEBUG)
 
-# print(settings.TEMP_VENV_FOLDER)
-# env_name = aivle_venv.create_venv("/home/leo/aivle-runner-v2/aivle-worker/requirements/base.txt")
-# print(env_name)
-# sandbox.run_with_venv(env_name, ["bash", "./bootstrap.sh"], "/tmp/aivle-worker/grading/test")
 
-argv = [
-    'worker',
-    '--loglevel=INFO',
-    '-Q',
-    CELERY_QUEUE,
-]
-app.worker_main(argv)
+def start_sandbox():
+    s = Submission(sid=233,
+                   task_url="file:///home/leo/Documents/fyp/aivle-worker/examples/aivle-single/grader.zip",
+                   agent_url="file:///home/leo/Documents/fyp/aivle-worker/examples/aivle-single/agent.zip")
+    run_submission(s, force=True)
+
+
+def start_worker():
+    argv = [
+        'worker',
+        '--loglevel=INFO',
+        '-Q',
+        CELERY_QUEUE,
+    ]
+    app.worker_main(argv)
+
+
+start_worker()
+# start_sandbox()
