@@ -26,7 +26,9 @@ def create_venv(req_path: str, force: bool = False) -> str:
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, universal_newlines=True)
     for stdout_line in iter(popen.stdout.readline, ""):
-        print(stdout_line)
+        print(stdout_line, end="")
+    for stderr_line in iter(popen.stderr.readline, ""):
+        print(stderr_line, end="")
     popen.stdout.close()
     return_code = popen.wait()
     if return_code:

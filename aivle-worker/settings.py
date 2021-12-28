@@ -26,3 +26,4 @@ ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 CELERY_BROKER_URI = os.getenv("BROKER_URI")
 CELERY_RESULT_BACKEND = "rpc"
 CELERY_QUEUE = os.getenv("TASK_QUEUE") if os.getenv("TASK_QUEUE") is not None else "default"
+CELERY_CONCURRENCY = os.getenv("CELERY_CONCURRENCY") if os.getenv("CELERY_CONCURRENCY") is not None else "1"

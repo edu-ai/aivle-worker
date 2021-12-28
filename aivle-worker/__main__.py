@@ -1,7 +1,7 @@
 import logging
 
 from client import Submission, run_submission
-from settings import CELERY_QUEUE
+from settings import CELERY_QUEUE, CELERY_CONCURRENCY
 from tasks import app
 
 logging.basicConfig(level=logging.DEBUG)
@@ -20,6 +20,7 @@ def start_worker():
         '--loglevel=INFO',
         '-Q',
         CELERY_QUEUE,
+        f'--concurrency={CELERY_CONCURRENCY}'
     ]
     app.worker_main(argv)
 

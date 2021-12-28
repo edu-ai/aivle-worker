@@ -11,14 +11,24 @@ There are two parts in `aivle-worker` module:
 
 If you want to test whether your aiVLE task bundle works, you may focus on *sandbox* part only.
 
+## Requirement
+
+This project is tested on the following environment. Similar environment may work but there is no
+guarantee.
+
+* Ubuntu 20.04
+* Firejail 0.9.62
+* Python 3.8 (with `python3.8-venv`)
+
 ## Getting Started
 
 1. Create `.env` (if you only intend to test sandbox, put dummy values on the RHS is enough):
 
 ```dotenv
-BROKER_URI=amqp://...
+BROKER_URI=amqp://... # use sqs:// for AWS SQS, and remember to pip install celery[sqs] for dependencies
 ACCESS_TOKEN=...
 TASK_QUEUE=gpu/private/default
+CELERY_CONCURRENCY=...
 ```
 
 ## Test Sandbox (for most users)
