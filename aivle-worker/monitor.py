@@ -9,6 +9,7 @@ logger = logging.getLogger("root")
 
 
 def start_monitor(queue_info: QueueInfo):
+    resume_consuming(queue_info)  # restore the default state in case the previous run ended in paused state
     paused = False  # TODO: only pause when the constraint is violated for multiple checks
     while True:
         free_memory = psutil.virtual_memory().available / (1024 * 1024)  # free memory (MiB)
