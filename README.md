@@ -13,8 +13,7 @@ If you want to test whether your aiVLE task bundle works, you may focus on *sand
 
 ## Requirement
 
-This project is tested on the following environment. Similar environment may work but there is no
-guarantee.
+This project is tested on the following environment. Similar environment may work but there is no guarantee.
 
 * Ubuntu 20.04
 * Firejail 0.9.62
@@ -29,6 +28,7 @@ BROKER_URI=amqp://... # use sqs:// for AWS SQS, and remember to pip install cele
 ACCESS_TOKEN=...
 TASK_QUEUE=gpu/private/default
 CELERY_CONCURRENCY=...
+WORKER_NAME=...
 ```
 
 ## Test Sandbox (for most users)

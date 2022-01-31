@@ -1,10 +1,13 @@
 import json
+import logging
 import os
 
 import requests
 
 from client import Submission
 from settings import API_BASE_URL, ACCESS_TOKEN
+
+logger = logging.getLogger("root")
 
 
 def get_task_url(task_id: int):

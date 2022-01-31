@@ -1,4 +1,5 @@
 import os
+import socket
 import tempfile
 
 from dotenv import load_dotenv
@@ -27,3 +28,5 @@ CELERY_BROKER_URI = os.getenv("BROKER_URI")
 CELERY_RESULT_BACKEND = "rpc"
 CELERY_QUEUE = os.getenv("TASK_QUEUE") if os.getenv("TASK_QUEUE") is not None else "default"
 CELERY_CONCURRENCY = os.getenv("CELERY_CONCURRENCY") if os.getenv("CELERY_CONCURRENCY") is not None else "1"
+WORKER_NAME = os.getenv("WORKER_NAME") if os.getenv("WORKER_NAME") is not None else "celery"
+FULL_WORKER_NAME = f"{WORKER_NAME}@{socket.gethostname()}"
