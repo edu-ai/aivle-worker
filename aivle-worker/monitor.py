@@ -3,11 +3,8 @@ import time
 
 import psutil
 
-import settings
-from apis import QueueInfo, stop_consuming, resume_consuming, get_queue_info
+from apis import QueueInfo, stop_consuming, resume_consuming
 
-logging.basicConfig()
-logging.root.setLevel(logging.DEBUG)
 logger = logging.getLogger("root")
 
 
@@ -28,7 +25,3 @@ def start_monitor(queue_info: QueueInfo):
                 logger.info("Operation resumed")
                 resume_consuming(queue_info)
         time.sleep(1)
-
-
-queue = get_queue_info(settings.QUEUE_NAME)
-start_monitor(queue)
