@@ -7,7 +7,7 @@ from monitor import start_monitor
 from settings import CELERY_QUEUE, CELERY_CONCURRENCY
 from tasks import app
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 def start_sandbox():
