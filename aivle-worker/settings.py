@@ -21,8 +21,8 @@ if not os.path.isdir(TEMP_GRADING_FOLDER):
 LOCAL_FILE = True
 
 # API config
-# API_BASE_URL = "http://localhost:8000/api/v1"
-API_BASE_URL = "https://aivle-api.leotan.cn/api/v1"
+API_BASE_URL = "http://localhost:8000/api/v1"
+# API_BASE_URL = "https://aivle-api.leotan.cn/api/v1"
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 CELERY_BROKER_URI = os.getenv("BROKER_URI")
 CELERY_RESULT_BACKEND = "rpc"

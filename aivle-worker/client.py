@@ -1,22 +1,16 @@
 import os
+import pickle
 import shutil
 import zipfile
+from ast import literal_eval
 
 import requests
 
 import settings
 import util
+from apis import get_task_info
+from models import Submission, ExecutionOutput
 from sandbox import create_venv, run_with_venv
-
-
-class Submission:
-    def __init__(self, sid: int, task_url: str, agent_url: str):
-        self.sid = sid
-        self.task_url = task_url
-        self.agent_url = agent_url
-
-    def __str__(self):
-        return f"Submission-{self.sid}-<{self.task_url}>-<{self.agent_url}>"
 
 
 def _download_submission(s: Submission) -> str:
@@ -37,13 +31,27 @@ def _download_submission(s: Submission) -> str:
     return temp_grading_folder
 
 
-def run_submission(s: Submission, force: bool = False) -> str:
+def run_submission(s: Submission, force: bool = False) -> ExecutionOutput:
     temp_grading_folder = _download_submission(s)
+    task_info = get_task_info(s.task_id)
     env_name = create_venv(os.path.join(temp_grading_folder, "requirements.txt"), force=force)
-    run_with_venv(env_name, ["bash", "./bootstrap.sh"], temp_grading_folder)
-    # TODO: output stderr
+    run_with_venv(env_name=env_name,
+                  command=["bash", "./bootstrap.sh"],
+                  home=temp_grading_folder,
+                  rlimit=task_info["ram_limit"])
     with open(os.path.join(temp_grading_folder, "stdout.log"), "r") as f:
-        stdout_log = f.read().split("\x07")[1].splitlines()[0]  # hack
+        raw_log = f.read()
+        stdout_log = raw_log.split("\x07")[1].splitlines()  # raw log with firejail initialization lines removed
+        try:
+            result = stdout_log[1]
+            pickle.loads(literal_eval(result))
+            ok = True
+        except Exception as e:
+            ok = False
+            # print(e)
         f.close()
-    shutil.rmtree(temp_grading_folder)
-    return stdout_log
+        shutil.rmtree(temp_grading_folder)
+    if ok:
+        return ExecutionOutput(ok=True, raw=raw_log, result=result, error=None)
+    else:
+        return ExecutionOutput(ok=False, raw=raw_log, result=None, error=stdout_log)

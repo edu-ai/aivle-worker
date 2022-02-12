@@ -4,8 +4,9 @@ import os
 
 import requests
 
-from client import Submission
 from errors import QueueInfoNotFound, StopConsumingError, ResumeConsumingError
+from models import QueueInfo
+from models import Submission, ExecutionOutput
 from settings import API_BASE_URL, ACCESS_TOKEN, FULL_WORKER_NAME
 
 logger = logging.getLogger("root")
@@ -17,6 +18,33 @@ def get_task_url(task_id: int):
 
 def get_agent_url(submission_id: int):
     return API_BASE_URL + f"/submissions/{submission_id}/download/"
+
+
+def get_task_info(task_id: int):
+    if task_id < 0:
+        # return dummy data for negative task ID (local test)
+        return {
+            "id": 1,
+            "grader": "courses/2/tasks/asdasd/grader/grader.zip",
+            "template": "courses/2/tasks/asdasd/template/agent.zip",
+            "daily_submission_limit": 100,
+            "max_upload_size": 5120,
+            "run_time_limit": 60,
+            "course": 1,
+            "name": "asdasd",
+            "description": "asdasd",
+            "ram_limit": 256,
+            "opened_at": "2022-01-30T01:47:31+08:00",
+            "deadline_at": "2022-01-30T01:47:30+08:00",
+            "closed_at": "2022-01-30T01:47:30+08:00",
+            "created_at": "2022-01-30T01:47:53.223015+08:00",
+            "updated_at": "2022-02-07T22:03:11.244212+08:00",
+            "eval_queue": 1
+        }
+    else:
+        resp = requests.get(API_BASE_URL + f"/tasks/{task_id}/",
+                            headers={"Authorization": f"Token {ACCESS_TOKEN}"})
+        return resp.json()
 
 
 def start_job(job_id, task_id) -> Submission:
@@ -33,34 +61,20 @@ def start_job(job_id, task_id) -> Submission:
         raise Exception(resp.content)
     obj = json.loads(resp.content)
     return Submission(sid=obj["submission"], task_url=get_task_url(obj["task"]),
-                      agent_url=get_agent_url(obj["submission"]))
+                      agent_url=get_agent_url(obj["submission"]), task_id=int(obj["task"]))
 
 
-def submit_job(job_id, task_id, result):
+def submit_job(job_id, task_id, output: ExecutionOutput):
     resp = requests.get(API_BASE_URL + f"/jobs/{job_id}/submit_job/",
                         headers={"Authorization": f"Token {ACCESS_TOKEN}"},
-                        data={
-                            "result": result,
-                            "task_id": task_id
+                        json={
+                            "task_id": task_id,
+                            "ok": output.ok,
+                            "raw_log": output.raw,
+                            "result": output.result,
+                            "error": output.error,
                         })
     return resp
-
-
-class QueueInfo:
-    """
-    CPU: percentage (integer)
-    RAM and VRAM: MiB (integer)
-    """
-
-    def __init__(self, pk: int, name: str, cpu: int, ram: int, vram: int):
-        self.pk = pk
-        self.name = name
-        self.cpu = cpu
-        self.ram = ram
-        self.vram = vram
-
-    def __str__(self):
-        return f"Resource Constraint - CPU {self.cpu}%, RAM {self.ram}MiB, VRAM {self.vram}MiB"
 
 
 def get_queue_info(queue_name: str) -> QueueInfo:
