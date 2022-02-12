@@ -36,20 +36,23 @@ def create_venv(req_path: str, force: bool = False) -> str:
     return env_name
 
 
-def run_with_venv(env_name: str, command: List[str], home: str = ""):
+def run_with_venv(env_name: str, command: List[str], home: str = "", rlimit: int = 256):
     """
     Run `command` within venv named `env_name`
 
     :param env_name: venv name
     :param command:
     :param home: path to the home directory (check --private={HOME} in Firejail doc)
+    :param rlimit: ram limit in MiB
     """
     full_cmd = ["firejail",
                 f"--profile={settings.PROFILE_PATH}",
                 "--read-only=/tmp",
                 f"--env=PATH={os.path.join(settings.TEMP_VENV_FOLDER, env_name)}/bin:/usr/bin",
-                f"--output={os.path.join(home, 'stdout.log')}",
-                f"--output-stderr={os.path.join(home, 'stderr.log')}"]
+                # f"--output={os.path.join(home, 'stdout.log')}",
+                f"--output-stderr={os.path.join(home, 'stdout.log')}",
+                f"--rlimit-as={rlimit * 1024 * 1024}",
+                ]
     if home != "":
         full_cmd.append(f"--private={home}")
     else:

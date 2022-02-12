@@ -19,7 +19,13 @@ def evaluate(self, job_id):
     submission = start_job(job_id, task_id)
     result = run_submission(submission)
     submit_job(job_id, task_id, result)
-    return result
+    print(result)
+    return {
+        "ok": result.ok,
+        "raw_log": result.raw,
+        "result": result.result,
+        "error": result.error,
+    }
 
 
 @celeryd_after_setup.connect
