@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="aivle_worker",
-    version="0.1.2",
+    version="0.1.3",
     description="Grader client for aiVLE submissions.",
     url="https://github.com/edu-ai/aivle-worker",
     author="Yuanhong Tan",
