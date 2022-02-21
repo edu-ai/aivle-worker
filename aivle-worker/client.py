@@ -38,7 +38,9 @@ def run_submission(s: Submission, force: bool = False) -> ExecutionOutput:
     run_with_venv(env_name=env_name,
                   command=["bash", "./bootstrap.sh"],
                   home=temp_grading_folder,
-                  rlimit=task_info["ram_limit"])
+                  rlimit=task_info["ram_limit"],
+                  vram_limit=task_info["vram_limit"],
+                  task_id=s.task_id)
     with open(os.path.join(temp_grading_folder, "stdout.log"), "r") as f:
         raw_log = f.read()
         stdout_log = raw_log.split("\x07")[1].splitlines()  # raw log with firejail initialization lines removed

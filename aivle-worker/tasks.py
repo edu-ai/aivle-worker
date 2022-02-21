@@ -15,10 +15,10 @@ app = Celery("worker", backend=CELERY_RESULT_BACKEND, broker=CELERY_BROKER_URI)
 
 @app.task(bind=True, name="aiVLE.submit_eval_task")
 def evaluate(self, job_id):
-    task_id = self.request.id
-    submission = start_job(job_id, task_id)
+    celery_task_id = self.request.id
+    submission = start_job(job_id, celery_task_id)
     result = run_submission(submission)
-    submit_job(job_id, task_id, result)
+    submit_job(job_id, celery_task_id, result)
     print(result)
     return {
         "ok": result.ok,

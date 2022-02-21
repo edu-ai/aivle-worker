@@ -30,3 +30,6 @@ CELERY_QUEUE = os.getenv("TASK_QUEUE") if os.getenv("TASK_QUEUE") is not None el
 CELERY_CONCURRENCY = os.getenv("CELERY_CONCURRENCY") if os.getenv("CELERY_CONCURRENCY") is not None else "1"
 WORKER_NAME = os.getenv("WORKER_NAME") if os.getenv("WORKER_NAME") is not None else "celery"
 FULL_WORKER_NAME = f"{WORKER_NAME}@{socket.gethostname()}"
+
+# Monitor config
+ZMQ_PORT = 15921

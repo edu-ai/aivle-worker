@@ -34,6 +34,7 @@ def get_task_info(task_id: int):
             "name": "asdasd",
             "description": "asdasd",
             "ram_limit": 256,
+            "vram_limit": 256,
             "opened_at": "2022-01-30T01:47:31+08:00",
             "deadline_at": "2022-01-30T01:47:30+08:00",
             "closed_at": "2022-01-30T01:47:30+08:00",
@@ -47,7 +48,7 @@ def get_task_info(task_id: int):
         return resp.json()
 
 
-def start_job(job_id, task_id) -> Submission:
+def start_job(job_id, celery_task_id) -> Submission:
     worker_name = "unknown_worker"
     if os.getenv("WORKER_NAME") is not None:
         worker_name = os.getenv("WORKER_NAME")
@@ -55,7 +56,7 @@ def start_job(job_id, task_id) -> Submission:
                         headers={"Authorization": f"Token {ACCESS_TOKEN}"},
                         data={
                             "worker_name": worker_name,
-                            "task_id": task_id
+                            "task_id": celery_task_id
                         })
     if resp.status_code != 200:
         raise Exception(resp.content)

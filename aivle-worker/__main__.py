@@ -3,7 +3,7 @@ from multiprocessing import Process
 
 from apis import get_queue_info
 from client import Submission, run_submission
-from monitor import start_monitor
+from monitor import start_monitor, start_warden
 from settings import CELERY_QUEUE, CELERY_CONCURRENCY
 from tasks import app
 
@@ -32,9 +32,12 @@ def start_worker():
 queue = get_queue_info(CELERY_QUEUE)
 monitor_process = Process(target=start_monitor, args=(queue,))
 worker_process = Process(target=start_worker)
+warden_process = Process(target=start_warden)
 monitor_process.start()
+warden_process.start()
 worker_process.start()
 monitor_process.join()
+warden_process.join()
 worker_process.join()
 
 # start_sandbox()

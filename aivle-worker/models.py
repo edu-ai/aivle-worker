@@ -31,6 +31,12 @@ class ExecutionOutput:
 
 class Submission:
     def __init__(self, sid: int, task_url: str, agent_url: str, task_id: int):
+        """
+        :param sid:
+        :param task_url:
+        :param agent_url:
+        :param task_id: NOT Celery task ID! This corresponds to an AI task, not a Celery evaluation task/job!
+        """
         self.sid = sid
         self.task_url = task_url
         self.agent_url = agent_url

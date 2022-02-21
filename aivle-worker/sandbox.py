@@ -3,6 +3,8 @@ import os
 import subprocess
 from typing import List
 
+import zmq
+
 import settings
 
 
@@ -36,28 +38,54 @@ def create_venv(req_path: str, force: bool = False) -> str:
     return env_name
 
 
-def run_with_venv(env_name: str, command: List[str], home: str = "", rlimit: int = 256):
+def run_with_venv(env_name: str, command: List[str], task_id: int, home: str = "", rlimit: int = 0,
+                  vram_limit: int = 256):
     """
     Run `command` within venv named `env_name`
 
     :param env_name: venv name
     :param command:
     :param home: path to the home directory (check --private={HOME} in Firejail doc)
-    :param rlimit: ram limit in MiB
+    :param rlimit: RAM limit in MiB (<=0 means no limit,
+    :param task_id: aiVLE task ID (NOT evaluation job/task ID)
+    :param vram_limit: VRAM limit in MiB
     """
     full_cmd = ["firejail",
                 f"--profile={settings.PROFILE_PATH}",
                 "--read-only=/tmp",
                 f"--env=PATH={os.path.join(settings.TEMP_VENV_FOLDER, env_name)}/bin:/usr/bin",
                 # f"--output={os.path.join(home, 'stdout.log')}",
-                f"--output-stderr={os.path.join(home, 'stdout.log')}",
-                f"--rlimit-as={rlimit * 1024 * 1024}",
-                ]
+                f"--output-stderr={os.path.join(home, 'stdout.log')}", ]
+    if rlimit > 0:
+        full_cmd.append(f"--rlimit-as={rlimit * 1024 * 1024}")
     if home != "":
         full_cmd.append(f"--private={home}")
     else:
         full_cmd.append("--private")
     full_cmd.extend(command)
     print(" ".join(full_cmd))
-    result = subprocess.run(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    proc = subprocess.Popen(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect(f"tcp://localhost:{settings.ZMQ_PORT}")
+    socket.send_pyobj({
+        "message_type": "sandbox-start",
+        "payload": {
+            "task_id": task_id,
+            "pid": proc.pid,
+            "vram_limit": vram_limit,
+        },
+    })
+    _ = socket.recv()
+    proc.wait()  # TODO: enforce time limit here for extra protection
+    # result = subprocess.run(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     # print(result.returncode, result.stderr, result.stdout)
+    socket.send_pyobj({
+        "message_type": "sandbox-finish",
+        "payload": {
+            "task_id": task_id,
+            "pid": proc.pid,
+            "vram_limit": vram_limit,
+        },
+    })
+    _ = socket.recv()
