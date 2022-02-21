@@ -37,3 +37,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Runtime error report
 - RAM limit for individual tasks
+
+## [0.2.0] - 2022-02-12
+
+### Added
+
+- VRAM limit for individual submission
