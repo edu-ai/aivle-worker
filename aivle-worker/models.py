@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union
 
 
 class QueueInfo:
@@ -19,7 +19,7 @@ class QueueInfo:
 
 
 class ExecutionOutput:
-    def __init__(self, ok: bool, raw: str, result: Union[str, None], error=Union[List[str], None]):
+    def __init__(self, ok: bool, raw: str, result: Union[str, None], error=Union[str, None]):
         self.ok = ok
         self.raw = raw
         self.result = result

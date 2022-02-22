@@ -19,7 +19,6 @@ def evaluate(self, job_id):
     submission = start_job(job_id, celery_task_id)
     result = run_submission(submission)
     submit_job(job_id, celery_task_id, result)
-    print(result)
     return {
         "ok": result.ok,
         "raw_log": result.raw,

@@ -8,7 +8,7 @@ import requests
 
 import settings
 import util
-from apis import get_task_info
+from apis import get_task_info, ERROR_RUNTIME_ERROR, ERROR_MEMORY_LIMIT_EXCEEDED
 from models import Submission, ExecutionOutput
 from sandbox import create_venv, run_with_venv
 
@@ -35,12 +35,13 @@ def run_submission(s: Submission, force: bool = False) -> ExecutionOutput:
     temp_grading_folder = _download_submission(s)
     task_info = get_task_info(s.task_id)
     env_name = create_venv(os.path.join(temp_grading_folder, "requirements.txt"), force=force)
-    run_with_venv(env_name=env_name,
-                  command=["bash", "./bootstrap.sh"],
-                  home=temp_grading_folder,
-                  rlimit=task_info["ram_limit"],
-                  vram_limit=task_info["vram_limit"],
-                  task_id=s.task_id)
+    error_type = run_with_venv(env_name=env_name,
+                               command=["bash", "./bootstrap.sh"],
+                               home=temp_grading_folder,
+                               rlimit=task_info["ram_limit"],
+                               vram_limit=task_info["vram_limit"],
+                               time_limit=task_info["run_time_limit"],
+                               task_id=s.task_id)
     with open(os.path.join(temp_grading_folder, "stdout.log"), "r") as f:
         raw_log = f.read()
         stdout_log = raw_log.split("\x07")[1].splitlines()  # raw log with firejail initialization lines removed
@@ -56,4 +57,9 @@ def run_submission(s: Submission, force: bool = False) -> ExecutionOutput:
     if ok:
         return ExecutionOutput(ok=True, raw=raw_log, result=result, error=None)
     else:
-        return ExecutionOutput(ok=False, raw=raw_log, result=None, error=stdout_log)
+        if "MemoryError" in stdout_log:
+            return ExecutionOutput(ok=False, raw=raw_log, result=None, error=ERROR_MEMORY_LIMIT_EXCEEDED)
+        elif error_type is not None:
+            return ExecutionOutput(ok=False, raw=raw_log, result=None, error=error_type)
+        else:
+            return ExecutionOutput(ok=False, raw=raw_log, result=None, error=ERROR_RUNTIME_ERROR)

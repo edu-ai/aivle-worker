@@ -65,6 +65,12 @@ def start_job(job_id, celery_task_id) -> Submission:
                       agent_url=get_agent_url(obj["submission"]), task_id=int(obj["task"]))
 
 
+ERROR_TIME_LIMIT_EXCEEDED = "TLE"
+ERROR_MEMORY_LIMIT_EXCEEDED = "MLE"
+ERROR_VRAM_LIMIT_EXCEEDED = "VLE"
+ERROR_RUNTIME_ERROR = "RE"
+
+
 def submit_job(job_id, task_id, output: ExecutionOutput):
     resp = requests.get(API_BASE_URL + f"/jobs/{job_id}/submit_job/",
                         headers={"Authorization": f"Token {ACCESS_TOKEN}"},

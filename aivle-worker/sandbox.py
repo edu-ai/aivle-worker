@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import os
 import subprocess
 from typing import List
@@ -6,6 +7,9 @@ from typing import List
 import zmq
 
 import settings
+from apis import ERROR_TIME_LIMIT_EXCEEDED, ERROR_RUNTIME_ERROR
+
+logger = logging.getLogger("root")
 
 
 def create_venv(req_path: str, force: bool = False) -> str:
@@ -39,7 +43,7 @@ def create_venv(req_path: str, force: bool = False) -> str:
 
 
 def run_with_venv(env_name: str, command: List[str], task_id: int, home: str = "", rlimit: int = 0,
-                  vram_limit: int = 256):
+                  vram_limit: int = 256, time_limit: int = 0) -> str:
     """
     Run `command` within venv named `env_name`
 
@@ -49,6 +53,9 @@ def run_with_venv(env_name: str, command: List[str], task_id: int, home: str = "
     :param rlimit: RAM limit in MiB (<=0 means no limit,
     :param task_id: aiVLE task ID (NOT evaluation job/task ID)
     :param vram_limit: VRAM limit in MiB
+    :param time_limit:
+
+    :return: error type (defined as constants in api)
     """
     full_cmd = ["firejail",
                 f"--profile={settings.PROFILE_PATH}",
@@ -63,7 +70,7 @@ def run_with_venv(env_name: str, command: List[str], task_id: int, home: str = "
     else:
         full_cmd.append("--private")
     full_cmd.extend(command)
-    print(" ".join(full_cmd))
+    logger.debug(f"[SANDBOX | run_with_venv] command: {' '.join(full_cmd)}")
     proc = subprocess.Popen(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
@@ -77,7 +84,16 @@ def run_with_venv(env_name: str, command: List[str], task_id: int, home: str = "
         },
     })
     _ = socket.recv()
-    proc.wait()  # TODO: enforce time limit here for extra protection
+    error_type = None
+    if time_limit > 0:
+        try:
+            proc.wait(time_limit + 30)  # wait 30 more seconds
+        except subprocess.TimeoutExpired:
+            error_type = ERROR_TIME_LIMIT_EXCEEDED
+    else:
+        return_code = proc.wait()
+        if return_code != 0:
+            error_type = ERROR_RUNTIME_ERROR
     # result = subprocess.run(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     # print(result.returncode, result.stderr, result.stdout)
     socket.send_pyobj({
@@ -89,3 +105,4 @@ def run_with_venv(env_name: str, command: List[str], task_id: int, home: str = "
         },
     })
     _ = socket.recv()
+    return error_type
