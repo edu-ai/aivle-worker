@@ -38,8 +38,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Runtime error report
 - RAM limit for individual tasks
 
-## [0.2.0] - 2022-02-12
+## [0.2.0] - 2022-02-22
 
 ### Added
 
 - VRAM limit for individual submission
+
+## [0.2.1] - 2022-02-23
+
+### Added
+
+- Report error type upon submission and warden termination (currently reports RE, TLE, MLE, VLE)
