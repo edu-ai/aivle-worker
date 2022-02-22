@@ -17,7 +17,7 @@ app = Celery("worker", backend=CELERY_RESULT_BACKEND, broker=CELERY_BROKER_URI)
 def evaluate(self, job_id):
     celery_task_id = self.request.id
     submission = start_job(job_id, celery_task_id)
-    result = run_submission(submission)
+    result = run_submission(s=submission, job_id=job_id, celery_task_id=celery_task_id)
     submit_job(job_id, celery_task_id, result)
     return {
         "ok": result.ok,

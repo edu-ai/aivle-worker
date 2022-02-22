@@ -31,7 +31,7 @@ def _download_submission(s: Submission) -> str:
     return temp_grading_folder
 
 
-def run_submission(s: Submission, force: bool = False) -> ExecutionOutput:
+def run_submission(s: Submission, job_id: int, celery_task_id: str, force: bool = False) -> ExecutionOutput:
     temp_grading_folder = _download_submission(s)
     task_info = get_task_info(s.task_id)
     env_name = create_venv(os.path.join(temp_grading_folder, "requirements.txt"), force=force)
@@ -41,7 +41,9 @@ def run_submission(s: Submission, force: bool = False) -> ExecutionOutput:
                                rlimit=task_info["ram_limit"],
                                vram_limit=task_info["vram_limit"],
                                time_limit=task_info["run_time_limit"],
-                               task_id=s.task_id)
+                               task_id=s.task_id,
+                               job_id=job_id,
+                               celery_task_id=celery_task_id)
     with open(os.path.join(temp_grading_folder, "stdout.log"), "r") as f:
         raw_log = f.read()
         stdout_log = raw_log.split("\x07")[1].splitlines()  # raw log with firejail initialization lines removed

@@ -84,6 +84,16 @@ def submit_job(job_id, task_id, output: ExecutionOutput):
     return resp
 
 
+def update_job_error(job_id: int, task_id: str, error: str):
+    resp = requests.get(API_BASE_URL + f"/jobs/{job_id}/update_job_error/",
+                        headers={"Authorization": f"Token {ACCESS_TOKEN}"},
+                        json={
+                            "task_id": task_id,
+                            "error": error
+                        })
+    return resp
+
+
 def get_queue_info(queue_name: str) -> QueueInfo:
     resp = requests.get(API_BASE_URL + f"/queue/", params={"name": queue_name},
                         headers={"Authorization": f"Token {ACCESS_TOKEN}"})

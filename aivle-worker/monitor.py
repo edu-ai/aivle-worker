@@ -6,7 +6,7 @@ import zmq
 from py3nvml.py3nvml import NVMLError, nvmlInit, nvmlDeviceGetCount, nvmlDeviceGetHandleByIndex, nvmlDeviceGetName, \
     nvmlDeviceGetMemoryInfo, nvmlDeviceGetComputeRunningProcesses
 
-from apis import QueueInfo, stop_consuming, resume_consuming
+from apis import QueueInfo, stop_consuming, resume_consuming, update_job_error, ERROR_VRAM_LIMIT_EXCEEDED
 from settings import ZMQ_PORT
 
 logger = logging.getLogger("root")
@@ -88,7 +88,7 @@ def start_warden():
     socket = context.socket(zmq.REP)
     socket.bind(f"tcp://*:{ZMQ_PORT}")
 
-    pid_to_vram_limit = {}
+    pid_to_task_info = {}
 
     while True:
         message = socket.recv_pyobj()
@@ -96,19 +96,19 @@ def start_warden():
         message_type = message["message_type"]
         payload = message["payload"]
         if message_type == "sandbox-start":
-            pid_to_vram_limit[payload["pid"]] = payload
+            pid_to_task_info[payload["pid"]] = payload
         elif message_type == "sandbox-finish":
-            pid_to_vram_limit.pop(payload["pid"], None)
+            pid_to_task_info.pop(payload["pid"], None)
         elif message_type == "monitor-update":
             pid_to_child_pids = {}
-            for parent in pid_to_vram_limit:
+            for parent in pid_to_task_info:
                 temp = [parent]
                 for child in psutil.Process(parent).children(recursive=True):
                     temp.append(child.pid)
                 pid_to_child_pids[parent] = temp
             pid_to_total_vram = {}
             for record in payload:
-                for parent in pid_to_vram_limit:
+                for parent in pid_to_task_info:
                     for child in pid_to_child_pids[parent]:
                         if record["pid"] == child:
                             if parent in pid_to_total_vram:
@@ -116,13 +116,16 @@ def start_warden():
                             else:
                                 pid_to_total_vram[parent] = record["vram"]
             for parent in pid_to_total_vram:
-                if pid_to_total_vram[parent] > pid_to_vram_limit[parent]["vram_limit"] * 1024 * 1024:
+                task_info = pid_to_task_info[parent]
+                if pid_to_total_vram[parent] > task_info["vram_limit"] * 1024 * 1024:
                     logger.info(f"[WARDEN] pid {parent} has a violation: "
                                 f"used {pid_to_total_vram[parent] / 1024 / 1024}MiB limit "
-                                f"{pid_to_vram_limit[parent]['vram_limit']}MiB")
+                                f"{pid_to_task_info[parent]['vram_limit']}MiB")
                     proc = psutil.Process(parent)
                     for child in proc.children(recursive=True):
                         child.kill()
                     proc.kill()
+                    update_job_error(job_id=task_info["job_id"], task_id=task_info["celery_task_id"],
+                                     error=ERROR_VRAM_LIMIT_EXCEEDED)
         else:
             logger.warning(f"[WARDEN] Unknown message type: {message_type}")

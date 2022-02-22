@@ -42,8 +42,8 @@ def create_venv(req_path: str, force: bool = False) -> str:
     return env_name
 
 
-def run_with_venv(env_name: str, command: List[str], task_id: int, home: str = "", rlimit: int = 0,
-                  vram_limit: int = 256, time_limit: int = 0) -> str:
+def run_with_venv(env_name: str, command: List[str], task_id: int, job_id: int, celery_task_id: str, home: str = "",
+                  rlimit: int = 0, vram_limit: int = 256, time_limit: int = 0) -> str:
     """
     Run `command` within venv named `env_name`
 
@@ -78,7 +78,8 @@ def run_with_venv(env_name: str, command: List[str], task_id: int, home: str = "
     socket.send_pyobj({
         "message_type": "sandbox-start",
         "payload": {
-            "task_id": task_id,
+            "job_id": job_id,
+            "celery_task_id": celery_task_id,
             "pid": proc.pid,
             "vram_limit": vram_limit,
         },
