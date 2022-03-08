@@ -6,8 +6,8 @@ from typing import List
 
 import zmq
 
-import settings
-from apis import ERROR_TIME_LIMIT_EXCEEDED, ERROR_RUNTIME_ERROR
+from .apis import ERROR_TIME_LIMIT_EXCEEDED, ERROR_RUNTIME_ERROR
+from .settings import PROFILE_PATH, TEMP_VENV_FOLDER, CREATE_VENV_PATH, ZMQ_PORT
 
 logger = logging.getLogger("root")
 
@@ -24,10 +24,10 @@ def create_venv(req_path: str, force: bool = False) -> str:
         req_str = f.read()
         f.close()
     env_name = hashlib.md5(req_str.encode("ascii")).hexdigest()
-    dst_path = os.path.join(settings.TEMP_VENV_FOLDER, env_name)
+    dst_path = os.path.join(TEMP_VENV_FOLDER, env_name)
     if os.path.exists(dst_path) and not force:
         return env_name
-    cmd = ["bash", settings.CREATE_VENV_PATH, dst_path, req_path]
+    cmd = ["bash", CREATE_VENV_PATH, dst_path, req_path]
     # Reference: https://stackoverflow.com/a/4417735
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE, universal_newlines=True)
@@ -58,9 +58,9 @@ def run_with_venv(env_name: str, command: List[str], task_id: int, job_id: int, 
     :return: error type (defined as constants in api)
     """
     full_cmd = ["firejail",
-                f"--profile={settings.PROFILE_PATH}",
+                f"--profile={PROFILE_PATH}",
                 "--read-only=/tmp",
-                f"--env=PATH={os.path.join(settings.TEMP_VENV_FOLDER, env_name)}/bin:/usr/bin",
+                f"--env=PATH={os.path.join(TEMP_VENV_FOLDER, env_name)}/bin:/usr/bin",
                 # f"--output={os.path.join(home, 'stdout.log')}",
                 f"--output-stderr={os.path.join(home, 'stdout.log')}", ]
     if rlimit > 0:
@@ -74,7 +74,7 @@ def run_with_venv(env_name: str, command: List[str], task_id: int, job_id: int, 
     proc = subprocess.Popen(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
-    socket.connect(f"tcp://localhost:{settings.ZMQ_PORT}")
+    socket.connect(f"tcp://localhost:{ZMQ_PORT}")
     socket.send_pyobj({
         "message_type": "sandbox-start",
         "payload": {

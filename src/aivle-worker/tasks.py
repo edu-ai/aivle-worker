@@ -5,9 +5,9 @@ import os
 from celery import Celery
 from celery.signals import celeryd_after_setup
 
-from apis import start_job, submit_job
-from client import run_submission
-from settings import CELERY_BROKER_URI, CELERY_RESULT_BACKEND
+from .apis import start_job, submit_job
+from .client import run_submission
+from .settings import CELERY_BROKER_URI, CELERY_RESULT_BACKEND
 
 # set the default Django settings module for the 'celery' program.
 app = Celery("worker", backend=CELERY_RESULT_BACKEND, broker=CELERY_BROKER_URI)

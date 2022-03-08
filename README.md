@@ -21,28 +21,52 @@ This project is tested on the following environment. Similar environment may wor
 
 ## Getting Started
 
+We assume you already installed `aivle-worker` by `pip install aivle-worker`.
+(If `pip install` doesn't work, try `pip install -i https://test.pypi.org/simple/ aivle-worker` to fetch from Test PyPI)
+
 1. Create `.env` (if you only intend to test sandbox, put dummy values on the RHS is enough):
 
+Required fields:
 ```dotenv
-BROKER_URI=amqp://... # use sqs:// for AWS SQS, and remember to pip install celery[sqs] for dependencies
+API_BASE_URL=...
+BROKER_URI=amqp://...# use sqs:// for AWS SQS, and remember to pip install celery[sqs] for dependencies
 ACCESS_TOKEN=...
+
+```
+Optional fields (shown here are the default values):
+```dotenv
 TASK_QUEUE=gpu/private/default
-CELERY_CONCURRENCY=...
-WORKER_NAME=...
+CELERY_CONCURRENCY=1
+WORKER_NAME=celery
+ZMQ_PORT=15921
 ```
 
-## Test Sandbox (for most users)
+2. `python -m aivle-worker` **in the same directory** as your `.env` file (reason: `load_dotenv` will look for `.env`
+in the current working directory).
+
+## Test Sandbox
+
+To test the standalone sandbox, you need to clone this repository and modify the source code under `src`.
 
 ### tl;dr
 
-Under `__main__.py`, rewrite paths in `start_sandbox()` function, run that function.
+Under `src/aivle-worker/__main__.py`, rewrite paths in `start_sandbox()` function, run that function.
 
 **NOTE**:
 
 1. There are three `/` in the URL (i.e. `file:///home/...`)
 2. You need to use absolute path
+3. To run the `__main__` function of `aivle-worker`, first navigate to the `src` folder, 
 
 ### Details
+
+1. Rewrite paths in `start_sandbox()` function defined in `__main__.py`
+2. In the `if __name__ == "__main__":` block, comment out everything else and uncomment `start_sandbox()`
+3. Make sure your current directoy is `src`, and `.env` is in `src` (i.e., `.env` is at the same level as 
+`/aivle-worker`)
+4. Run `python -m aivle-worker`
+
+### How It Works
 
 Referring to `settings.py`, by default the sandbox will load security profile from `profiles/aivle-base.profile`
 and the shell script to create new virtual environment will be `scripts/create-venv.sh`, and the temporary folder will

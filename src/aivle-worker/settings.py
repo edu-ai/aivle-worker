@@ -4,11 +4,17 @@ import tempfile
 
 from dotenv import load_dotenv
 
-load_dotenv(verbose=True)
+from .errors import DotEnvFileNotFound, MissingDotEnvField
+
+DOTENV_PATH = "./.env"
+if not os.path.exists(DOTENV_PATH):
+    raise DotEnvFileNotFound()
+load_dotenv(verbose=True, dotenv_path=DOTENV_PATH)
 
 # Sandbox config
-PROFILE_PATH = "./profiles/aivle-base.profile"
-CREATE_VENV_PATH = "./scripts/create-venv.sh"
+package_directory = os.path.dirname(os.path.abspath(__file__))
+PROFILE_PATH = os.path.join(package_directory, "profiles", "aivle-base.profile")  # "./profiles/aivle-base.profile"
+CREATE_VENV_PATH = os.path.join(package_directory, "scripts", "create-venv.sh")  # "./scripts/create-venv.sh"
 TEMP_FOLDER_ROOT = os.path.join(tempfile.gettempdir(), "aivle-worker")
 if not os.path.isdir(TEMP_FOLDER_ROOT):
     os.mkdir(TEMP_FOLDER_ROOT)
@@ -21,9 +27,14 @@ if not os.path.isdir(TEMP_GRADING_FOLDER):
 LOCAL_FILE = True
 
 # API config
-API_BASE_URL = "http://localhost:8000/api/v1"
-# API_BASE_URL = "https://aivle-api.leotan.cn/api/v1"
+if os.getenv("API_BASE_URL") is None:
+    raise MissingDotEnvField("API_BASE_URL")
+API_BASE_URL = os.getenv("API_BASE_URL")
+if os.getenv("ACCESS_TOKEN") is None:
+    raise MissingDotEnvField("ACCESS_TOKEN")
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
+if os.getenv("BROKER_URI") is None:
+    raise MissingDotEnvField("BROKER_URI")
 CELERY_BROKER_URI = os.getenv("BROKER_URI")
 CELERY_RESULT_BACKEND = "rpc"
 CELERY_QUEUE = os.getenv("TASK_QUEUE") if os.getenv("TASK_QUEUE") is not None else "default"
@@ -32,4 +43,4 @@ WORKER_NAME = os.getenv("WORKER_NAME") if os.getenv("WORKER_NAME") is not None e
 FULL_WORKER_NAME = f"{WORKER_NAME}@{socket.gethostname()}"
 
 # Monitor config
-ZMQ_PORT = 15921
+ZMQ_PORT = os.getenv("ZMQ_PORT") if os.getenv("ZMQ_PORT") is not None else 15921

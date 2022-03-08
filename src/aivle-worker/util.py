@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import requests
 from requests import Session
 
-from settings import ACCESS_TOKEN
+from .settings import ACCESS_TOKEN
 
 if sys.version_info.major < 3:
     from urllib import url2pathname

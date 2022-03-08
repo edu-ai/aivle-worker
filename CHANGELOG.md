@@ -49,3 +49,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Report error type upon submission and warden termination (currently reports RE, TLE, MLE, VLE)
+
+## [0.2.2] - 2022-03-08
+
+Packaging the module for publishing to PyPI

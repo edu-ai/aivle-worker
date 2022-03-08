@@ -4,10 +4,9 @@ import os
 
 import requests
 
-from errors import QueueInfoNotFound, StopConsumingError, ResumeConsumingError
-from models import QueueInfo
-from models import Submission, ExecutionOutput
-from settings import API_BASE_URL, ACCESS_TOKEN, FULL_WORKER_NAME
+from .errors import QueueInfoNotFound, StopConsumingError, ResumeConsumingError
+from .models import QueueInfo, Submission, ExecutionOutput
+from .settings import API_BASE_URL, ACCESS_TOKEN, FULL_WORKER_NAME
 
 logger = logging.getLogger("root")
 

@@ -6,26 +6,26 @@ from ast import literal_eval
 
 import requests
 
-import settings
-import util
-from apis import get_task_info, ERROR_RUNTIME_ERROR, ERROR_MEMORY_LIMIT_EXCEEDED
-from models import Submission, ExecutionOutput
-from sandbox import create_venv, run_with_venv
+from .settings import LOCAL_FILE, TEMP_GRADING_FOLDER
+from .util import LocalFileAdapter, download_and_save
+from .apis import get_task_info, ERROR_RUNTIME_ERROR, ERROR_MEMORY_LIMIT_EXCEEDED
+from .models import Submission, ExecutionOutput
+from .sandbox import create_venv, run_with_venv
 
 
 def _download_submission(s: Submission) -> str:
-    temp_grading_folder = os.path.join(settings.TEMP_GRADING_FOLDER, str(s.sid))
+    temp_grading_folder = os.path.join(TEMP_GRADING_FOLDER, str(s.sid))
     if not os.path.exists(temp_grading_folder):
         os.mkdir(temp_grading_folder)
     session = requests.Session()
-    if settings.LOCAL_FILE:
-        session.mount("file://", util.LocalFileAdapter())
+    if LOCAL_FILE:
+        session.mount("file://", LocalFileAdapter())
     task_zip_path = os.path.join(temp_grading_folder, "task.zip")
-    util.download_and_save(session, s.task_url, task_zip_path)
+    download_and_save(session, s.task_url, task_zip_path)
     with zipfile.ZipFile(task_zip_path, "r") as zip_ref:
         zip_ref.extractall(temp_grading_folder)
     agent_zip_path = os.path.join(temp_grading_folder, "agent.zip")
-    util.download_and_save(session, s.agent_url, agent_zip_path)
+    download_and_save(session, s.agent_url, agent_zip_path)
     with zipfile.ZipFile(agent_zip_path, "r") as zip_ref:
         zip_ref.extractall(temp_grading_folder)
     return temp_grading_folder

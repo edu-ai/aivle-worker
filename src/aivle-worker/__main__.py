@@ -1,11 +1,11 @@
 import logging
 from multiprocessing import Process
 
-from apis import get_queue_info
-from client import Submission, run_submission
-from monitor import start_monitor, start_warden
-from settings import CELERY_QUEUE, CELERY_CONCURRENCY
-from tasks import app
+from .apis import get_queue_info
+from .client import Submission, run_submission
+from .monitor import start_monitor, start_warden
+from .settings import CELERY_QUEUE, CELERY_CONCURRENCY
+from .tasks import app
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,15 +29,16 @@ def start_worker():
     app.worker_main(argv)
 
 
-queue = get_queue_info(CELERY_QUEUE)
-monitor_process = Process(target=start_monitor, args=(queue,))
-worker_process = Process(target=start_worker)
-warden_process = Process(target=start_warden)
-monitor_process.start()
-warden_process.start()
-worker_process.start()
-monitor_process.join()
-warden_process.join()
-worker_process.join()
+if __name__ == "__main__":
+    queue = get_queue_info(CELERY_QUEUE)
+    monitor_process = Process(target=start_monitor, args=(queue,))
+    worker_process = Process(target=start_worker)
+    warden_process = Process(target=start_warden)
+    monitor_process.start()
+    warden_process.start()
+    worker_process.start()
+    monitor_process.join()
+    warden_process.join()
+    worker_process.join()
 
-# start_sandbox()
+    # start_sandbox()

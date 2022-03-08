@@ -6,8 +6,8 @@ import zmq
 from py3nvml.py3nvml import NVMLError, nvmlInit, nvmlDeviceGetCount, nvmlDeviceGetHandleByIndex, nvmlDeviceGetName, \
     nvmlDeviceGetMemoryInfo, nvmlDeviceGetComputeRunningProcesses
 
-from apis import QueueInfo, stop_consuming, resume_consuming, update_job_error, ERROR_VRAM_LIMIT_EXCEEDED
-from settings import ZMQ_PORT
+from .apis import QueueInfo, stop_consuming, resume_consuming, update_job_error, ERROR_VRAM_LIMIT_EXCEEDED
+from .settings import ZMQ_PORT
 
 logger = logging.getLogger("root")
 
