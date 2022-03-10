@@ -50,18 +50,17 @@ To test the standalone sandbox, you need to clone this repository and modify the
 
 ### tl;dr
 
-Under `src/aivle-worker/__main__.py`, rewrite paths in `start_sandbox()` function, run that function.
+Under `src/aivle-worker/entry_point.py`, rewrite paths in `start_sandbox()` function, run that function.
 
 **NOTE**:
 
 1. There are three `/` in the URL (i.e. `file:///home/...`)
 2. You need to use absolute path
-3. To run the `__main__` function of `aivle-worker`, first navigate to the `src` folder, 
 
-### Details
+### Details on how to run `start_sandbox()`
 
-1. Rewrite paths in `start_sandbox()` function defined in `__main__.py`
-2. In the `if __name__ == "__main__":` block, comment out everything else and uncomment `start_sandbox()`
+1. Rewrite paths in `start_sandbox()` function defined in `entry_point.py`
+2. In the `if __name__ == "__main__":` block of `__main.py`, include `start_sandbox()` only
 3. Make sure your current directoy is `src`, and `.env` is in `src` (i.e., `.env` is at the same level as 
 `/aivle-worker`)
 4. Run `python -m aivle-worker`

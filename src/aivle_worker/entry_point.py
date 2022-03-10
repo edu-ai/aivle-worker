@@ -1,21 +1,20 @@
-import logging
 from multiprocessing import Process
 
 from .apis import get_queue_info
-from .client import Submission, run_submission
+from .client import run_submission
+from .constants import SANDBOX_ONLY_TASK_ID
+from .models import Submission
 from .monitor import start_monitor, start_warden
 from .settings import CELERY_QUEUE, CELERY_CONCURRENCY
 from .tasks import app
-
-logging.basicConfig(level=logging.INFO)
 
 
 def start_sandbox():
     s = Submission(sid=233,
                    task_url="file:///home/leo/Documents/fyp/aivle-worker/examples/worker-ram-limit/grader.zip",
                    agent_url="file:///home/leo/Documents/fyp/aivle-worker/examples/worker-ram-limit/agent.zip",
-                   task_id=-1)  # negative task ID will return dummy task information
-    print(run_submission(s, force=True))
+                   task_id=SANDBOX_ONLY_TASK_ID)  # negative task ID will return dummy task information
+    print(run_submission(s, force=True, celery_task_id="", job_id=-1))
 
 
 def start_worker():
@@ -29,7 +28,7 @@ def start_worker():
     app.worker_main(argv)
 
 
-if __name__ == "__main__":
+def start():
     queue = get_queue_info(CELERY_QUEUE)
     monitor_process = Process(target=start_monitor, args=(queue,))
     worker_process = Process(target=start_worker)
@@ -40,5 +39,3 @@ if __name__ == "__main__":
     monitor_process.join()
     warden_process.join()
     worker_process.join()
-
-    # start_sandbox()

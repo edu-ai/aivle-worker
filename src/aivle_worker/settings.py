@@ -43,4 +43,26 @@ WORKER_NAME = os.getenv("WORKER_NAME") if os.getenv("WORKER_NAME") is not None e
 FULL_WORKER_NAME = f"{WORKER_NAME}@{socket.gethostname()}"
 
 # Monitor config
-ZMQ_PORT = os.getenv("ZMQ_PORT") if os.getenv("ZMQ_PORT") is not None else 15921
+ZMQ_PORT = os.getenv("ZMQ_PORT") if os.getenv("ZMQ_PORT") is not None else "15921"
+
+
+def update_queue(val: str):
+    global CELERY_QUEUE
+    CELERY_QUEUE = val
+
+
+def update_concurrency(val: int):
+    global CELERY_CONCURRENCY
+    CELERY_CONCURRENCY = str(val)
+    print(CELERY_CONCURRENCY)
+
+
+def update_worker_name(val: str):
+    global WORKER_NAME, FULL_WORKER_NAME
+    WORKER_NAME = val
+    FULL_WORKER_NAME = f"{WORKER_NAME}@{socket.gethostname()}"
+
+
+def update_zmq_port(val: int):
+    global ZMQ_PORT
+    ZMQ_PORT = str(val)

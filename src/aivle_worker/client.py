@@ -6,11 +6,11 @@ from ast import literal_eval
 
 import requests
 
-from .settings import LOCAL_FILE, TEMP_GRADING_FOLDER
-from .util import LocalFileAdapter, download_and_save
 from .apis import get_task_info, ERROR_RUNTIME_ERROR, ERROR_MEMORY_LIMIT_EXCEEDED
 from .models import Submission, ExecutionOutput
 from .sandbox import create_venv, run_with_venv
+from .settings import LOCAL_FILE, TEMP_GRADING_FOLDER
+from .util import LocalFileAdapter, download_and_save
 
 
 def _download_submission(s: Submission) -> str:

@@ -53,3 +53,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.2.2] - 2022-03-08
 
 Packaging the module for publishing to PyPI
+
+## [0.2.3] - 2022-03-10
+
+### Added
+
+- Command line interface - now you can use `aivle-worker` as a command after `pip install aivle-worker`

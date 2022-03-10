@@ -7,6 +7,7 @@ from typing import List
 import zmq
 
 from .apis import ERROR_TIME_LIMIT_EXCEEDED, ERROR_RUNTIME_ERROR
+from .constants import SANDBOX_ONLY_TASK_ID
 from .settings import PROFILE_PATH, TEMP_VENV_FOLDER, CREATE_VENV_PATH, ZMQ_PORT
 
 logger = logging.getLogger("root")
@@ -47,6 +48,8 @@ def run_with_venv(env_name: str, command: List[str], task_id: int, job_id: int, 
     """
     Run `command` within venv named `env_name`
 
+    :param celery_task_id:
+    :param job_id: ID of Job model in aiVLE Web
     :param env_name: venv name
     :param command:
     :param home: path to the home directory (check --private={HOME} in Firejail doc)
@@ -57,6 +60,8 @@ def run_with_venv(env_name: str, command: List[str], task_id: int, job_id: int, 
 
     :return: error type (defined as constants in api)
     """
+    # if task_id is -1, then we're running with sandbox only, no need to communicate with warden
+    sandbox_only = task_id == SANDBOX_ONLY_TASK_ID
     full_cmd = ["firejail",
                 f"--profile={PROFILE_PATH}",
                 "--read-only=/tmp",
@@ -74,17 +79,18 @@ def run_with_venv(env_name: str, command: List[str], task_id: int, job_id: int, 
     proc = subprocess.Popen(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
-    socket.connect(f"tcp://localhost:{ZMQ_PORT}")
-    socket.send_pyobj({
-        "message_type": "sandbox-start",
-        "payload": {
-            "job_id": job_id,
-            "celery_task_id": celery_task_id,
-            "pid": proc.pid,
-            "vram_limit": vram_limit,
-        },
-    })
-    _ = socket.recv()
+    if not sandbox_only:
+        socket.connect(f"tcp://localhost:{ZMQ_PORT}")
+        socket.send_pyobj({
+            "message_type": "sandbox-start",
+            "payload": {
+                "job_id": job_id,
+                "celery_task_id": celery_task_id,
+                "pid": proc.pid,
+                "vram_limit": vram_limit,
+            },
+        })
+        _ = socket.recv()
     error_type = None
     if time_limit > 0:
         try:
@@ -97,13 +103,14 @@ def run_with_venv(env_name: str, command: List[str], task_id: int, job_id: int, 
             error_type = ERROR_RUNTIME_ERROR
     # result = subprocess.run(full_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     # print(result.returncode, result.stderr, result.stdout)
-    socket.send_pyobj({
-        "message_type": "sandbox-finish",
-        "payload": {
-            "task_id": task_id,
-            "pid": proc.pid,
-            "vram_limit": vram_limit,
-        },
-    })
-    _ = socket.recv()
+    if not sandbox_only:
+        socket.send_pyobj({
+            "message_type": "sandbox-finish",
+            "payload": {
+                "task_id": task_id,
+                "pid": proc.pid,
+                "vram_limit": vram_limit,
+            },
+        })
+        _ = socket.recv()
     return error_type

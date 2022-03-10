@@ -1,3 +1,3 @@
-include src/aivle-worker/profiles/*
-include src/aivle-worker/requirements/*
-include src/aivle-worker/scripts/*
+include src/aivle_worker/profiles/*
+include src/aivle_worker/requirements/*
+include src/aivle_worker/scripts/*

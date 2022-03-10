@@ -4,6 +4,7 @@ import os
 
 import requests
 
+from .constants import SANDBOX_ONLY_TASK_ID
 from .errors import QueueInfoNotFound, StopConsumingError, ResumeConsumingError
 from .models import QueueInfo, Submission, ExecutionOutput
 from .settings import API_BASE_URL, ACCESS_TOKEN, FULL_WORKER_NAME
@@ -20,7 +21,7 @@ def get_agent_url(submission_id: int):
 
 
 def get_task_info(task_id: int):
-    if task_id < 0:
+    if task_id == SANDBOX_ONLY_TASK_ID:
         # return dummy data for negative task ID (local test)
         return {
             "id": 1,
