@@ -1,9 +1,5 @@
 # aiVLE Worker
 
-Secure and scalable grading client for aiVLE platform.
-
----
-
 There are two parts in `aivle-worker` module:
 
 - Sandbox: `sandbox.py` and everything under `profiles`, `requirements`, `scripts`
@@ -18,6 +14,12 @@ This project is tested on the following environment. Similar environment may wor
 * Ubuntu 20.04
 * Firejail 0.9.62
 * Python 3.8 (with `python3.8-venv`)
+
+## Installation
+
+From Test PyPI: `pip install -i https://test.pypi.org/simple/ aivle-worker`
+
+From PyPI: `pip install aivle-worker`
 
 ## Getting Started
 
